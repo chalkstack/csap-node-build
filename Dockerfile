@@ -27,10 +27,12 @@ RUN curl https://bootstrap.pypa.io/ez_setup.py > /tmp/ez_setup.py
 RUN python /tmp/ez_setup.py
 RUN easy_install /tmp/PyRFC/dist/pyrfc-1.9.4-py2.7-linux-x86_64.egg
 
-# Get csap-node
-RUN conda install pip
+# Install csap-node
+RUN conda install -y \
+    PyMySQL SQLAlchemy pyodbc \
+    Flask requests \
+    pandas
 RUN git clone https://github.com/chalkstack/csap-node /csap-node
-RUN pip install -r /csap-node/requirements.txt
 
 # Housekeeping
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -41,3 +43,6 @@ RUN useradd -c 'ChalkSAP User' -m -d /home/cks -s "/bin/bash" cks \
     && adduser cks sudo
 USER cks
 WORKDIR /home/cks
+
+# Start the server
+CMD python /csap-node/csap_node_app.py 5101
