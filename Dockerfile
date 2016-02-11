@@ -23,7 +23,9 @@ RUN python /tmp/ez_setup.py
 RUN easy_install /tmp/PyRFC/dist/pyrfc-1.9.4-py2.7-linux-x86_64.egg
 
 # Get csap-node
-RUN git clone https://github.com/chalkstack/csap-node /csap-node
+RUN mkdir /csap
+RUN git clone https://github.com/chalkstack/csap-node /csap/csap-node
+RUN pip install -r /csap/csap-node/requirements.txt
 
 # Housekeeping
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
