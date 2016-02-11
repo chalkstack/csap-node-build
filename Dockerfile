@@ -7,12 +7,17 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get install -y \
     git \
     bzip2 \
-    curl \
-    python python-dev python-pip
+    curl
+
+# Install miniconda
+RUN curl -LO http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
+RUN bash Miniconda-latest-Linux-x86_64.sh -p /csap/miniconda -b
+ENV PATH=/csap/miniconda/bin:${PATH}
+RUN conda update -y conda
 
 # Install PyRFC v1.9.4
 # See PyRFC project at sap.github.io/pyrfc
-RUN pip install Cython==0.22.1
+RUN conda install -y Cython==0.22.1
 COPY nwrfcsdk /usr/sap/nwrfcsdk
 COPY nwrfcsdk.conf /etc/ld.so.conf.d/nwrfcsdk.conf
 RUN ldconfig
@@ -22,7 +27,11 @@ RUN curl https://bootstrap.pypa.io/ez_setup.py > /tmp/ez_setup.py
 RUN python /tmp/ez_setup.py
 RUN easy_install /tmp/PyRFC/dist/pyrfc-1.9.4-py2.7-linux-x86_64.egg
 
-# Get csap-node
+# Install csap-node
+RUN conda install -y \
+    PyMySQL SQLAlchemy pyodbc \
+    Flask requests \
+    pandas
 RUN git clone https://github.com/chalkstack/csap-node /csap-node
 
 # Housekeeping
@@ -34,3 +43,6 @@ RUN useradd -c 'ChalkSAP User' -m -d /home/cks -s "/bin/bash" cks \
     && adduser cks sudo
 USER cks
 WORKDIR /home/cks
+
+# Start the server
+CMD python /csap-node/csap_node_app.py 5101
